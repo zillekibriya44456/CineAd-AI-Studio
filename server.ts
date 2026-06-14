@@ -438,40 +438,36 @@ app.post("/api/generate-concept-art", async (req, res) => {
       });
     }
 
-    console.log("Calling Gemini Image Gen model: gemini-2.5-flash-image for visual artwork...");
-    const response = await gemini.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: {
-        parts: [
-          {
-            text: `High quality cinematic award-winning advertisement concept art, perfect professional photography, cinematic lighting, dramatic style: ${prompt}`,
-          }
-        ]
-      },
-      config: {
-        imageConfig: {
+    console.log("Calling Google Imagen API for visual artwork...");
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${process.env.GEMINI_API_KEY}`;
+    
+    const imageResponse = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        instances: [
+          { prompt: `High quality cinematic award-winning advertisement concept art, perfect professional photography, cinematic lighting, dramatic style: ${prompt}` }
+        ],
+        parameters: {
+          sampleCount: 1,
           aspectRatio: "16:9"
         }
-      }
+      })
     });
 
+    const data = await imageResponse.json();
     let base64Data = "";
-    if (response.candidates && response.candidates[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          base64Data = part.inlineData.data;
-          break;
-        }
-      }
+    if (data.predictions && data.predictions[0]?.bytesBase64Encoded) {
+      base64Data = data.predictions[0].bytesBase64Encoded;
     }
 
     if (base64Data) {
       return res.json({
-        imageUrl: `data:image/png;base64,${base64Data}`,
+        imageUrl: `data:image/jpeg;base64,${base64Data}`,
         isReal: true
       });
     } else {
-      console.warn("Could not find inlineData in Gemini response, falling back.");
+      console.warn("Could not find image in Imagen response, falling back.", data);
       return res.json({
         imageUrl: `https://images.unsplash.com/photo-1541701494587-cb52502866ab?q=80&w=600&auto=format&fit=crop`,
         isSimulation: true

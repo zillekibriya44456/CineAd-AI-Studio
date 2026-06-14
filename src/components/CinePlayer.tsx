@@ -156,10 +156,10 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
               {activeScene && (
                 <motion.div
                   key={activeScene.id}
-                  initial={{ opacity: 0, scale: 0.98 }}
+                  initial={{ opacity: 0, scale: 1.05 }}
                   animate={{ opacity: 1, scale: 1.0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.8 }}
                   className="absolute inset-0 w-full h-full"
                 >
                   {/* Widescreen Still */}
@@ -173,19 +173,57 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
                   />
 
                   {/* High quality overlay gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/40"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/60 pointer-events-none"></div>
 
-                  {/* Left bottom specs overlay */}
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <p className="text-emerald-400 text-xs font-mono tracking-widest uppercase mb-1 flex items-center gap-1.5">
-                      <Camera className="w-3.5 h-3.5 text-emerald-400" />
-                      {activeScene.cameraMovement}
-                    </p>
-                    <p className="text-xs text-slate-300 font-sans tracking-wide leading-relaxed bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/40 backdrop-blur-md">
-                      <span className="text-amber-400 font-mono text-[10px] uppercase block mb-0.5">VFX Director Settings</span>
-                      {activeScene.vfxCgiEffects}
-                    </p>
-                  </div>
+                  {/* Cinematic Typography Overlay (Simulating Final Ad) */}
+                  <AnimatePresence mode="wait">
+                    {isPlaying && (
+                      <motion.div 
+                        key={activeScene.dialogueNarration}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 1.2 }}
+                        className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center z-20 pointer-events-none drop-shadow-2xl"
+                      >
+                        {activeSceneIndex === scenes.length - 1 ? (
+                          <>
+                            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight uppercase drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
+                              {ad.adTitle}
+                            </h2>
+                            <p className="text-xl md:text-2xl font-bold text-amber-400 mt-4 tracking-wide drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+                              {ad.callToAction}
+                            </p>
+                          </>
+                        ) : (
+                          <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
+                            "{activeScene.dialogueNarration}"
+                          </h2>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Left bottom specs overlay (Hidden during playback for immersion) */}
+                  <AnimatePresence>
+                    {!isPlaying && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="absolute bottom-6 left-6 right-6"
+                      >
+                        <p className="text-emerald-400 text-xs font-mono tracking-widest uppercase mb-1 flex items-center gap-1.5">
+                          <Camera className="w-3.5 h-3.5 text-emerald-400" />
+                          {activeScene.cameraMovement}
+                        </p>
+                        <p className="text-xs text-slate-300 font-sans tracking-wide leading-relaxed bg-slate-950/50 p-2.5 rounded-lg border border-slate-800/40 backdrop-blur-md">
+                          <span className="text-amber-400 font-mono text-[10px] uppercase block mb-0.5">VFX Director Settings</span>
+                          {activeScene.vfxCgiEffects}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
             </AnimatePresence>
