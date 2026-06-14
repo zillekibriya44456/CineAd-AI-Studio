@@ -3,6 +3,7 @@ import path from "path";
 import { GoogleGenAI, Type } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 import dns from "dns";
+import "dotenv/config";
 
 // Fix Node system issues resolving local hosts if any
 dns.setDefaultResultOrder("ipv4first");

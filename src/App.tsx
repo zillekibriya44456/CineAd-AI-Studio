@@ -101,6 +101,7 @@ export default function App() {
       const data = await response.json();
       if (data) {
         setCampaignData(data);
+        setActiveTab("storyboards");
         if (data._debug_notice) {
           setGenerationError(data._debug_notice);
         }

@@ -107,6 +107,24 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
     }
   };
 
+  // Auto-generate concept art for all scenes sequentially when ad loads
+  useEffect(() => {
+    let isSubscribed = true;
+    const autoGenerate = async () => {
+      for (const scene of scenes) {
+        if (!isSubscribed) break;
+        // Check state safely via functional updates or ref in real world, but this works for basic auto-start
+        if (!customSceneImages[scene.id]) {
+          await generateConceptArt(scene.id, scene.conceptPrompt);
+        }
+      }
+    };
+    autoGenerate();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [ad.adTitle]); // Re-run when ad changes
+
   // Helper to format simulated video editing timecode (Hours:Minutes:Seconds:Frames)
   const formatTimecode = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -142,7 +160,7 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12">
         {/* Left Side: Dynamic Viewport of the Ad */}
         <div className="lg:col-span-8 p-6 bg-slate-950 flex flex-col justify-between min-h-[460px] relative">
-          
+
           {/* Active scene label */}
           <div className="absolute top-8 left-8 bg-slate-950/90 border border-slate-800/80 px-3 py-1.5 rounded-full text-[11px] font-mono tracking-wider text-slate-300 flex items-center gap-2 z-10">
             <span className="text-amber-400 font-bold">SCENE {activeSceneIndex + 1}/{scenes.length}</span>
@@ -166,9 +184,8 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
                   <img
                     src={customSceneImages[activeScene.id] || getFallbackImage(activeScene)}
                     alt={activeScene.headline}
-                    className={`w-full h-full object-cover select-none transition-transform duration-[6000ms] ${
-                      isPlaying ? "scale-110" : "scale-100"
-                    }`}
+                    className={`w-full h-full object-cover select-none transition-transform duration-[6000ms] ${isPlaying ? "scale-110" : "scale-100"
+                      }`}
                     referrerPolicy="no-referrer"
                   />
 
@@ -178,7 +195,7 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
                   {/* Cinematic Typography Overlay (Simulating Final Ad) */}
                   <AnimatePresence mode="wait">
                     {isPlaying && (
-                      <motion.div 
+                      <motion.div
                         key={activeScene.dialogueNarration}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -207,7 +224,7 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
                   {/* Left bottom specs overlay (Hidden during playback for immersion) */}
                   <AnimatePresence>
                     {!isPlaying && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
@@ -255,9 +272,8 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
           <div className="mt-5 flex flex-wrap items-center gap-4 border-t border-slate-800/50 pt-4">
             <button
               onClick={handlePlayToggle}
-              className={`p-3 rounded-full flex items-center justify-center transition-all ${
-                isPlaying ? "bg-amber-500 hover:bg-amber-600 text-slate-950" : "bg-violet-600 hover:bg-violet-500 text-white"
-              } shadow-lg`}
+              className={`p-3 rounded-full flex items-center justify-center transition-all ${isPlaying ? "bg-amber-500 hover:bg-amber-600 text-slate-950" : "bg-violet-600 hover:bg-violet-500 text-white"
+                } shadow-lg`}
               id="btn_play_play_toggle"
             >
               {isPlaying ? <Pause className="w-5 h-5 fill-slate-950" /> : <Play className="w-5 h-5 fill-white ml-0.5" />}
@@ -325,11 +341,10 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
                   <div
                     key={scene.id}
                     onClick={() => handleSceneSelect(index)}
-                    className={`cursor-pointer p-3 rounded-xl border transition-all ${
-                      isActive
+                    className={`cursor-pointer p-3 rounded-xl border transition-all ${isActive
                         ? "bg-violet-950/40 border-violet-700/80 shadow-md"
                         : "bg-slate-900/60 border-slate-800/85 hover:bg-slate-800/50 hover:border-slate-800"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-850 text-slate-400 font-semibold">
@@ -339,7 +354,7 @@ export default function CinePlayer({ ad }: CinePlayerProps) {
                     </div>
                     <p className="text-xs font-bold text-slate-200 line-clamp-1 mb-1">{scene.headline}</p>
                     <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">{scene.visualCgiDescription}</p>
-                    
+
                     {/* Concept state info inside directory list */}
                     {customSceneImages[scene.id] && (
                       <span className="mt-2 text-[9px] bg-emerald-950/70 border border-emerald-800 text-emerald-400 px-1.5 py-0.5 rounded-full inline-flex items-center gap-1">
