@@ -1,0 +1,6 @@
+{
+  "name": "CineAd AI Studio",
+  "description": "High-end cinematic AI Advertisement Generation Platform featuring Brand Intelligence, Consumer Psychoanalysis, and Multi-Style Storyboard Production.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
